@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+
+  backend-go:
+    build:
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_HOST: mysql-backend
+      MYSQL_PORT: 3306
+      MYSQL_DBNAME: xsstest
+      MYSQL_USER: user
+      MYSQL_PASS: password
+    entrypoint: dockerize -wait tcp://mysql-backend:3306 -timeout 60s
+    command: air -c /development/air.toml
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./webapp:/webapp"
+    depends_on:
+      - mysql-backend
+  mysql-backend:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: xsstest
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    expose:
+      - "3306"
+      
+  adminbot:
+    build:
+      dockerfile: adminbot/Dockerfile
+    restart: always
+    tty: true
+    environment:
+      APP_URI: http://backend-go:3000
+    volumes:
+      - "./adminbot/cache_rod:/root/.cache/rod"
+    depends_on:
+      - backend-go
+

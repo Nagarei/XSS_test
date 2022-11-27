@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>product page</title>
+    <style type="text/css">
+        /* ブロックボックスとインラインボックス */
+        .comment {
+        margin:10px; padding:10px; border:5px solid black;
+        background-color:lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1>product page</h1>
+    
+    {{index . "comment_posted"}}
+
+    IIKANJI Super Keyboard
+    <br>
+    <img 
+     width=50%
+     src="/media/keyboard.png"
+     alt="keyboard">
+     <br>
+     
+    <h2>comments</h2>
+
+    {{index . "comments"}}
+
+    <h2>new comment</h2>
+    <form method="POST" action="/comment">
+        <dl>
+            <dt>name:</dt>
+            <dd><input type="text" name="name"></dd>
+            <dt>comment:</dt>
+            <dd><textarea rows="10" cols="60" name="comment"></textarea></dd>
+        </dl>
+        <p><input type="submit" name="submit" value="submit"></p>
+    </form>
+
+    <a href="/login">admin login</a>
+</body>
+</html>
